@@ -1,0 +1,66 @@
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurants</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>table, tr, td, th, tbody { border: 1px solid black; border-collapse: collapse; }
+</style>
+<body>
+    <div id="app">
+      <button v-on:click="update()">Mettre à jour</button>
+
+      <table v-for="restaurant in restaurants">
+        <thead>
+          <tr>
+            <th>Restaurant {{ restaurant.name }}</th>
+            <th> {{ restaurant.city }} - {{ restaurant.nbcouverts }} couverts - {{ terrasse(restaurant.terrasse) }} - {{ parking(restaurant.parking) }} </th>
+            <th><button @click="deleteRestaurant(restaurant.id)">X</button></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td :rowspan="restaurant.employees.length + 1">Equipe</td>
+          </tr>
+          <tr v-for="employe in restaurant.employees">
+            <td>{{ employe.first_name }} {{ employe.last_name }}</td>
+            <td><button @click="deleteEmployee(employe.employee_id)">X</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+    <script>
+        let app = new Vue({
+            el: "#app",
+            data: {
+                restaurants: []
+            },
+            methods: {
+                update() {
+                  axios.get("http://127.0.0.1:5000/restaurants")
+                  .then(res => {
+                      console.log(res.data);
+                      this.restaurants = res.data;
+                  })
+                  .catch(error => this.restaurants = [{"name":"Erreur de chargement"}])
+                },
+                terrasse(terrasse) {
+                  return terrasse === 'non' ? 'pas de terrasse' : 'terrasse';
+                },
+                parking(parking) {
+                  return parking === 'non' ? 'pas de parking' : 'parking';
+                },
+                deleteEmployee(employeId) {                  
+                  axios.delete("http://127.0.0.1:5000/restaurants/employes/" + employeId);
+                },
+                deleteRestaurant(restaurantId) {
+                  axios.delete("http://127.0.0.1:5000/restaurants/" + restaurantId);
+                }
+            }
+        })
+    </script>
+</body>
+</html>
